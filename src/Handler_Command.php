@@ -1,10 +1,10 @@
 <?php
 
-namespace WP_CLI\Embeds;
+namespace FP_CLI\Embeds;
 
-use WP_CLI;
-use WP_CLI\Formatter;
-use WP_CLI_Command;
+use FP_CLI;
+use FP_CLI\Formatter;
+use FP_CLI_Command;
 
 /**
  * Retrieves embed handlers.
@@ -12,7 +12,7 @@ use WP_CLI_Command;
  * ## EXAMPLES
  *
  *     # List id,regex,priority fields of available handlers.
- *     $ wp embed handler list --fields=priority,id
+ *     $ fp embed handler list --fields=priority,id
  *     +----------+-------------------+
  *     | priority | id                |
  *     +----------+-------------------+
@@ -20,9 +20,9 @@ use WP_CLI_Command;
  *     | 9999     | audio             |
  *     | 9999     | video             |
  *
- * @package wp-cli
+ * @package fp-cli
  */
-class Handler_Command extends WP_CLI_Command {
+class Handler_Command extends FP_CLI_Command {
 	protected $default_fields = array(
 		'id',
 		'regex',
@@ -64,7 +64,7 @@ class Handler_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # List id,regex,priority fields of available handlers.
-	 *     $ wp embed handler list --fields=priority,id
+	 *     $ fp embed handler list --fields=priority,id
 	 *     +----------+-------------------+
 	 *     | priority | id                |
 	 *     +----------+-------------------+
@@ -75,13 +75,13 @@ class Handler_Command extends WP_CLI_Command {
 	 * @subcommand list
 	 */
 	public function list_handlers( $args, $assoc_args ) {
-		/** @var \WP_Embed $wp_embed */
-		global $wp_embed;
+		/** @var \FP_Embed $fp_embed */
+		global $fp_embed;
 
 		$all_handlers = array();
 
-		ksort( $wp_embed->handlers );
-		foreach ( $wp_embed->handlers as $priority => $handlers ) {
+		ksort( $fp_embed->handlers );
+		foreach ( $fp_embed->handlers as $priority => $handlers ) {
 			foreach ( $handlers as $id => $handler ) {
 				$all_handlers[] = array(
 					'id'       => $id,
@@ -100,7 +100,7 @@ class Handler_Command extends WP_CLI_Command {
 	 * Get Formatter object based on supplied parameters.
 	 *
 	 * @param array $assoc_args Parameters passed to command. Determines formatting.
-	 * @return \WP_CLI\Formatter
+	 * @return \FP_CLI\Formatter
 	 */
 	protected function get_formatter( &$assoc_args ) {
 		return new Formatter( $assoc_args, $this->default_fields );

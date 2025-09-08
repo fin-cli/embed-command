@@ -1,8 +1,8 @@
 {
-    "name": "wp-cli/embed-command",
-    "type": "wp-cli-package",
+    "name": "fp-cli/embed-command",
+    "type": "fp-cli-package",
     "description": "Inspects oEmbed providers, clears embed cache, and more.",
-    "homepage": "https://github.com/wp-cli/embed-command",
+    "homepage": "https://github.com/fp-cli/embed-command",
     "license": "MIT",
     "authors": [
         {
@@ -11,18 +11,18 @@
         }
     ],
     "require": {
-        "wp-cli/wp-cli": "^2.12"
+        "fp-cli/fp-cli": "^2.12"
     },
     "require-dev": {
-        "wp-cli/entity-command": "^1.3 || ^2",
-        "wp-cli/wp-cli-tests": "^5"
+        "fp-cli/entity-command": "^1.3 || ^2",
+        "fp-cli/fp-cli-tests": "^5"
     },
     "config": {
         "process-timeout": 7200,
         "sort-packages": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "johnpbloch/wordpress-core-installer": true,
+            "johnpbloch/finpress-core-installer": true,
             "phpstan/extension-installer": true
         },
         "lock": false
@@ -48,7 +48,7 @@
     },
     "autoload": {
         "psr-4": {
-            "WP_CLI\\Embeds\\": "src/"
+            "FP_CLI\\Embeds\\": "src/"
         },
         "files": [
             "embed-command.php"
@@ -74,6 +74,6 @@
         ]
     },
     "support": {
-        "issues": "https://github.com/wp-cli/embed-command/issues"
+        "issues": "https://github.com/fp-cli/embed-command/issues"
     }
 }

@@ -1,12 +1,12 @@
 <?php
 
-namespace WP_CLI\Embeds;
+namespace FP_CLI\Embeds;
 
-use WP_CLI;
-use WP_CLI\Process;
-use WP_CLI\Utils;
-use WP_CLI\Formatter;
-use WP_CLI_Command;
+use FP_CLI;
+use FP_CLI\Process;
+use FP_CLI\Utils;
+use FP_CLI\Formatter;
+use FP_CLI_Command;
 
 /**
  * Finds, triggers, and deletes oEmbed caches.
@@ -14,20 +14,20 @@ use WP_CLI_Command;
  * ## EXAMPLES
  *
  *     # Find cache post ID for a given URL.
- *     $ wp embed cache find https://www.youtube.com/watch?v=dQw4w9WgXcQ --width=500
+ *     $ fp embed cache find https://www.youtube.com/watch?v=dQw4w9WgXcQ --width=500
  *     123
  *
  *     # Clear cache for a post.
- *     $ wp embed cache clear 123
+ *     $ fp embed cache clear 123
  *     Success: Cleared oEmbed cache.
  *
  *     # Triggers cache for a post.
- *     $ wp embed cache trigger 456
+ *     $ fp embed cache trigger 456
  *     Success: Caching triggered!
  *
- * @package wp-cli
+ * @package fp-cli
  */
-class Cache_Command extends WP_CLI_Command {
+class Cache_Command extends FP_CLI_Command {
 
 	/**
 	 * Deletes all oEmbed caches for a given post.
@@ -42,12 +42,12 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Clear cache for a post
-	 *     $ wp embed cache clear 123
+	 *     $ fp embed cache clear 123
 	 *     Success: Cleared oEmbed cache.
 	 */
 	public function clear( $args, $assoc_args ) {
-		/** @var \WP_Embed $wp_embed */
-		global $wp_embed;
+		/** @var \FP_Embed $fp_embed */
+		global $fp_embed;
 
 		$post_id = $args[0];
 
@@ -63,18 +63,18 @@ class Cache_Command extends WP_CLI_Command {
 		}
 
 		if ( empty( $post_metas ) ) {
-			WP_CLI::error( 'No cache to clear!' );
+			FP_CLI::error( 'No cache to clear!' );
 		}
 
-		$wp_embed->delete_oembed_caches( $post_id );
+		$fp_embed->delete_oembed_caches( $post_id );
 
-		WP_CLI::success( 'Cleared oEmbed cache.' );
+		FP_CLI::success( 'Cleared oEmbed cache.' );
 	}
 
 	/**
 	 * Finds an oEmbed cache post ID for a given URL.
 	 *
-	 * Starting with WordPress 4.9, embeds that aren't associated with a specific post will be cached in
+	 * Starting with FinPress 4.9, embeds that aren't associated with a specific post will be cached in
 	 * a new oembed_cache post type. There can be more than one such entry for a url depending on attributes and context.
 	 *
 	 * Not to be confused with oEmbed caches for a given post which are stored in the post's metadata.
@@ -96,12 +96,12 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Find cache post ID for a given URL.
-	 *     $ wp embed cache find https://www.youtube.com/watch?v=dQw4w9WgXcQ --width=500
+	 *     $ fp embed cache find https://www.youtube.com/watch?v=dQw4w9WgXcQ --width=500
 	 *     123
 	 */
 	public function find( $args, $assoc_args ) {
-		/** @var \WP_Embed $wp_embed */
-		global $wp_embed;
+		/** @var \FP_Embed $fp_embed */
+		global $fp_embed;
 
 		$url      = $args[0];
 		$width    = Utils\get_flag_value( $assoc_args, 'width' );
@@ -123,25 +123,25 @@ class Cache_Command extends WP_CLI_Command {
 			$discovers = array( null, '1', '0' );
 		}
 
-		$attr = wp_parse_args( $oembed_args, wp_embed_defaults( $url ) );
+		$attr = fp_parse_args( $oembed_args, fp_embed_defaults( $url ) );
 
 		foreach ( $discovers as $discover ) {
 			if ( null !== $discover ) {
 				$attr['discover'] = $discover;
 			}
-			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- needed to mimic WP Core behavior. See: \WP_Embed::shortcode.
+			// phpcs:ignore FinPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- needed to mimic FP Core behavior. See: \FP_Embed::shortcode.
 			$key_suffix = md5( $url . serialize( $attr ) );
 
-			$cached_post_id = $wp_embed->find_oembed_post_id( $key_suffix );
+			$cached_post_id = $fp_embed->find_oembed_post_id( $key_suffix );
 
 			if ( $cached_post_id ) {
-				WP_CLI::line( (string) $cached_post_id );
+				FP_CLI::line( (string) $cached_post_id );
 
 				return;
 			}
 		}
 
-		WP_CLI::error( 'No cache post ID found!' );
+		FP_CLI::error( 'No cache post ID found!' );
 	}
 
 	/**
@@ -157,33 +157,33 @@ class Cache_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Triggers cache for a post
-	 *     $ wp embed cache trigger 456
+	 *     $ fp embed cache trigger 456
 	 *     Success: Caching triggered!
 	 */
 	public function trigger( $args, $assoc_args ) {
-		/** @var \WP_Embed $wp_embed */
-		global $wp_embed;
+		/** @var \FP_Embed $fp_embed */
+		global $fp_embed;
 
 		$post_id    = $args[0];
 		$post       = get_post( $post_id );
 		$post_types = get_post_types( array( 'show_ui' => true ) );
 
 		if ( empty( $post->ID ) ) {
-			WP_CLI::warning( sprintf( "Post id '%s' not found.", $post_id ) );
+			FP_CLI::warning( sprintf( "Post id '%s' not found.", $post_id ) );
 
 			return;
 		}
 
-		/** This filter is documented in wp-includes/class-wp-embed.php */
-		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Using WP Core hook.
+		/** This filter is documented in fp-includes/class-fp-embed.php */
+		// phpcs:ignore FinPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Using FP Core hook.
 		if ( ! in_array( $post->post_type, apply_filters( 'embed_cache_oembed_types', $post_types ), true ) ) {
-			WP_CLI::warning( sprintf( "Cannot cache oEmbed results for '%s' post type", $post->post_type ) );
+			FP_CLI::warning( sprintf( "Cannot cache oEmbed results for '%s' post type", $post->post_type ) );
 
 			return;
 		}
 
-		$wp_embed->cache_oembed( $post_id );
+		$fp_embed->cache_oembed( $post_id );
 
-		WP_CLI::success( 'Caching triggered!' );
+		FP_CLI::success( 'Caching triggered!' );
 	}
 }

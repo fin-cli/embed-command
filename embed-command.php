@@ -1,23 +1,23 @@
 <?php
 
-if ( ! class_exists( 'WP_CLI' ) ) {
+if ( ! class_exists( 'FP_CLI' ) ) {
 	return;
 }
 
-$wpcli_embed_autoloader = __DIR__ . '/vendor/autoload.php';
+$fpcli_embed_autoloader = __DIR__ . '/vendor/autoload.php';
 
-if ( file_exists( $wpcli_embed_autoloader ) ) {
-	require_once $wpcli_embed_autoloader;
+if ( file_exists( $fpcli_embed_autoloader ) ) {
+	require_once $fpcli_embed_autoloader;
 }
 
-if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
-	WP_CLI::add_command( 'embed', '\WP_CLI\Embeds\Embeds_Namespace' );
+if ( class_exists( 'FP_CLI\Dispatcher\CommandNamespace' ) ) {
+	FP_CLI::add_command( 'embed', '\FP_CLI\Embeds\Embeds_Namespace' );
 }
 
-WP_CLI::add_command( 'embed fetch', '\WP_CLI\Embeds\Fetch_Command' );
+FP_CLI::add_command( 'embed fetch', '\FP_CLI\Embeds\Fetch_Command' );
 
-WP_CLI::add_command( 'embed provider', '\WP_CLI\Embeds\Provider_Command' );
+FP_CLI::add_command( 'embed provider', '\FP_CLI\Embeds\Provider_Command' );
 
-WP_CLI::add_command( 'embed handler', '\WP_CLI\Embeds\Handler_Command' );
+FP_CLI::add_command( 'embed handler', '\FP_CLI\Embeds\Handler_Command' );
 
-WP_CLI::add_command( 'embed cache', '\WP_CLI\Embeds\Cache_Command' );
+FP_CLI::add_command( 'embed cache', '\FP_CLI\Embeds\Cache_Command' );

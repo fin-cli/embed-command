@@ -1,18 +1,18 @@
 Feature: Manage oEmbed providers.
 
   Background:
-    Given a WP install
+    Given a FP install
     And a filter-providers.php file:
       """
       <?php
-      WP_CLI::add_wp_hook( 'oembed_providers', function ( $providers ) {
+      FP_CLI::add_fp_hook( 'oembed_providers', function ( $providers ) {
         $providers['http://example.com/*'] = [ 'http://example.com/api/oembed.{format}', false ];
         return $providers;
       });
       """
 
   Scenario: List oEmbed providers
-    When I run `wp embed provider list --require=filter-providers.php`
+    When I run `fp embed provider list --require=filter-providers.php`
     And save STDOUT as {DEFAULT_STDOUT}
     Then STDOUT should contain:
       """
@@ -67,13 +67,13 @@ Feature: Manage oEmbed providers.
       spotify.com
       """
 
-    When I run `wp embed provider list --fields=format,endpoint --require=filter-providers.php`
+    When I run `fp embed provider list --fields=format,endpoint --require=filter-providers.php`
     Then STDOUT should be:
       """
       {DEFAULT_STDOUT}
       """
 
-    When I run `wp embed provider list --force-regex --require=filter-providers.php`
+    When I run `fp embed provider list --force-regex --require=filter-providers.php`
     Then STDOUT should contain:
       """
       #https?\://example\.com/(.+)#i
@@ -88,7 +88,7 @@ Feature: Manage oEmbed providers.
       """
     And STDOUT should match /^#http/m
 
-    When I run `wp embed provider list --fields=format`
+    When I run `fp embed provider list --fields=format`
     Then STDOUT should contain:
       """
       format
@@ -106,7 +106,7 @@ Feature: Manage oEmbed providers.
       youtube.com
       """
 
-    When I run `wp embed provider list --field=format`
+    When I run `fp embed provider list --field=format`
     Then STDOUT should not contain:
       """
       format
@@ -124,21 +124,21 @@ Feature: Manage oEmbed providers.
       youtube.com
       """
 
-    When I run `wp embed provider list --field=regex`
+    When I run `fp embed provider list --field=regex`
     Then STDOUT should match /^(?:(?:1|0)\n)+$/
 
-  @require-wp-4.0
+  @require-fp-4.0
   Scenario: Match an oEmbed provider
     # Provider not requiring discovery
-    When I run `wp embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ`
+    When I run `fp embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ`
     Then STDOUT should contain:
       """
       //www.youtube.com/oembed
       """
 
     # Provider requiring discovery
-    # Old versions of WP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
-    When I try `wp embed provider match https://audio.com/audio-com/collections/ambient-focus`
+    # Old versions of FP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
+    When I try `fp embed provider match https://audio.com/audio-com/collections/ambient-focus`
     And save STDOUT as {DEFAULT_STDOUT}
     Then the return code should be 0
     And STDERR should not contain:
@@ -158,8 +158,8 @@ Feature: Manage oEmbed providers.
       xml
       """
 
-    # Old versions of WP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
-    When I try `wp embed provider match https://audio.com/audio-com/collections/ambient-focus --link-type=json`
+    # Old versions of FP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
+    When I try `fp embed provider match https://audio.com/audio-com/collections/ambient-focus --link-type=json`
     Then the return code should be 0
     And STDERR should not contain:
       """
@@ -170,8 +170,8 @@ Feature: Manage oEmbed providers.
       {DEFAULT_STDOUT}
       """
 
-    # Old versions of WP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
-    When I try `wp embed provider match https://audio.com/audio-com/collections/ambient-focus --link-type=xml`
+    # Old versions of FP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
+    When I try `fp embed provider match https://audio.com/audio-com/collections/ambient-focus --link-type=xml`
     Then the return code should be 0
     And STDERR should not contain:
       """
@@ -194,14 +194,14 @@ Feature: Manage oEmbed providers.
       json
       """
 
-  # Depends on `oembed_remote_get_args` filter introduced in WP 4.0 https://core.trac.wordpress.org/ticket/23442
-  @require-wp-4.0
+  # Depends on `oembed_remote_get_args` filter introduced in FP 4.0 https://core.trac.finpress.org/ticket/23442
+  @require-fp-4.0
   Scenario: Discover a provider with limited response size
-    When I run `wp embed provider match https://audio.com/audio-com/collections/ambient-focus`
+    When I run `fp embed provider match https://audio.com/audio-com/collections/ambient-focus`
     Then save STDOUT as {DEFAULT_STDOUT}
 
     # Response limit too small
-    When I try `wp embed provider match https://audio.com/audio-com/collections/ambient-focus --limit-response-size=10`
+    When I try `fp embed provider match https://audio.com/audio-com/collections/ambient-focus --limit-response-size=10`
     Then the return code should be 1
     And STDERR should be:
       """
@@ -209,14 +209,14 @@ Feature: Manage oEmbed providers.
       """
 
     # Response limit big enough
-    When I run `wp embed provider match https://audio.com/audio-com/collections/ambient-focus --limit-response-size=50000`
+    When I run `fp embed provider match https://audio.com/audio-com/collections/ambient-focus --limit-response-size=50000`
     Then STDOUT should be:
       """
       {DEFAULT_STDOUT}
       """
 
   Scenario: Fail to match an oEmbed provider
-    When I try `wp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover`
+    When I try `fp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover`
     Then the return code should be 1
     And STDERR should be:
       """
@@ -224,27 +224,27 @@ Feature: Manage oEmbed providers.
       """
     And STDOUT should be empty
 
-    When I try `wp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ`
+    When I try `fp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ`
     Then the return code should be 1
-    # Old versions of WP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "contain" to ignore these.
+    # Old versions of FP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "contain" to ignore these.
     And STDERR should contain:
       """
       Error: No oEmbed provider found for given URL.
       """
     And STDOUT should be empty
 
-    When I try `wp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --discover`
+    When I try `fp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --discover`
     Then the return code should be 1
-    # Old versions of WP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "contain" to ignore these.
+    # Old versions of FP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "contain" to ignore these.
     And STDERR should contain:
       """
       Error: No oEmbed provider found for given URL.
       """
     And STDOUT should be empty
 
-  @require-wp-4.0
+  @require-fp-4.0
   Scenario: Only match an oEmbed provider if discover
-    When I try `wp embed provider match https://audio.com/audio-com/collections/ambient-focus --no-discover`
+    When I try `fp embed provider match https://audio.com/audio-com/collections/ambient-focus --no-discover`
     Then the return code should be 1
     And STDERR should be:
       """
@@ -252,8 +252,8 @@ Feature: Manage oEmbed providers.
       """
     And STDOUT should be empty
 
-    # Old versions of WP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
-    When I try `wp embed provider match https://audio.com/audio-com/collections/ambient-focus`
+    # Old versions of FP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
+    When I try `fp embed provider match https://audio.com/audio-com/collections/ambient-focus`
     Then the return code should be 0
     And STDERR should not contain:
       """
@@ -268,8 +268,8 @@ Feature: Manage oEmbed providers.
       collection
       """
 
-    # Old versions of WP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
-    When I try `wp embed provider match https://audio.com/audio-com/collections/ambient-focus --discover`
+    # Old versions of FP_oEmbed can trigger PHP "Only variables should be passed by reference" notices on discover so use "try" to cater for these.
+    When I try `fp embed provider match https://audio.com/audio-com/collections/ambient-focus --discover`
     Then the return code should be 0
     And STDERR should not contain:
       """
@@ -281,7 +281,7 @@ Feature: Manage oEmbed providers.
       """
 
   Scenario: Incompatible or wrong options
-    When I try `wp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover --limit-response-size=50000`
+    When I try `fp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover --limit-response-size=50000`
     Then the return code should be 1
     And STDERR should be:
       """
@@ -289,7 +289,7 @@ Feature: Manage oEmbed providers.
       """
     And STDOUT should be empty
 
-    When I try `wp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover --link-type=json`
+    When I try `fp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover --link-type=json`
     Then the return code should be 1
     And STDERR should be:
       """
@@ -297,7 +297,7 @@ Feature: Manage oEmbed providers.
       """
     And STDOUT should be empty
 
-    When I try `wp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover --limit-response-size=50000 --link-type=json`
+    When I try `fp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover --limit-response-size=50000 --link-type=json`
     Then the return code should be 1
     And STDERR should be:
       """
@@ -305,7 +305,7 @@ Feature: Manage oEmbed providers.
       """
     And STDOUT should be empty
 
-    When I try `wp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover --link-type=blah`
+    When I try `fp embed provider match https://www.example.com/watch?v=dQw4w9WgXcQ --no-discover --link-type=blah`
     Then the return code should be 1
     And STDERR should contain:
       """

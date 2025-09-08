@@ -1,11 +1,11 @@
 <?php
 
-namespace WP_CLI\Embeds;
+namespace FP_CLI\Embeds;
 
-use WP_CLI;
-use WP_CLI\Formatter;
-use WP_CLI\Utils;
-use WP_CLI_Command;
+use FP_CLI;
+use FP_CLI\Formatter;
+use FP_CLI\Utils;
+use FP_CLI_Command;
 
 /**
  * Retrieves oEmbed providers.
@@ -13,21 +13,21 @@ use WP_CLI_Command;
  * ## EXAMPLES
  *
  *     # List format,endpoint fields of available providers.
- *     $ wp embed provider list
+ *     $ fp embed provider list
  *     +------------------------------+-----------------------------------------+
  *     | format                       | endpoint                                |
  *     +------------------------------+-----------------------------------------+
  *     | #https?://youtu\.be/.*#i     | https://www.youtube.com/oembed          |
  *     | #https?://flic\.kr/.*#i      | https://www.flickr.com/services/oembed/ |
- *     | #https?://wordpress\.tv/.*#i | https://wordpress.tv/oembed/            |
+ *     | #https?://finpress\.tv/.*#i | https://finpress.tv/oembed/            |
  *
  *     # Get the matching provider for the URL.
- *     $ wp embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ
+ *     $ fp embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ
  *     https://www.youtube.com/oembed
  *
- * @package wp-cli
+ * @package fp-cli
  */
-class Provider_Command extends WP_CLI_Command {
+class Provider_Command extends FP_CLI_Command {
 	protected $default_fields = array(
 		'format',
 		'endpoint',
@@ -71,13 +71,13 @@ class Provider_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # List format,endpoint fields of available providers.
-	 *     $ wp embed provider list --fields=format,endpoint
+	 *     $ fp embed provider list --fields=format,endpoint
 	 *     +------------------------------+-----------------------------------------+
 	 *     | format                       | endpoint                                |
 	 *     +------------------------------+-----------------------------------------+
 	 *     | #https?://youtu\.be/.*#i     | https://www.youtube.com/oembed          |
 	 *     | #https?://flic\.kr/.*#i      | https://www.flickr.com/services/oembed/ |
-	 *     | #https?://wordpress\.tv/.*#i | https://wordpress.tv/oembed/            |
+	 *     | #https?://finpress\.tv/.*#i | https://finpress.tv/oembed/            |
 	 *
 	 * @subcommand list
 	 *
@@ -86,7 +86,7 @@ class Provider_Command extends WP_CLI_Command {
 	 */
 	public function list_providers( $args, $assoc_args ) {
 
-		$oembed = new \WP_oEmbed();
+		$oembed = new \FP_oEmbed();
 
 		$force_regex = Utils\get_flag_value( $assoc_args, 'force-regex' );
 
@@ -124,7 +124,7 @@ class Provider_Command extends WP_CLI_Command {
 	 * : Whether to use oEmbed discovery or not. Defaults to true.
 	 *
 	 * [--limit-response-size=<size>]
-	 * : Limit the size of the resulting HTML when using discovery. Default 150 KB (the standard WordPress limit). Not compatible with 'no-discover'.
+	 * : Limit the size of the resulting HTML when using discovery. Default 150 KB (the standard FinPress limit). Not compatible with 'no-discover'.
 	 *
 	 * [--link-type=<json|xml>]
 	 * : Whether to accept only a certain link type when using discovery. Defaults to any (json or xml), preferring json. Not compatible with 'no-discover'.
@@ -137,7 +137,7 @@ class Provider_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Get the matching provider for the URL.
-	 *     $ wp embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ
+	 *     $ fp embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ
 	 *     https://www.youtube.com/oembed
 	 *
 	 * @subcommand match
@@ -146,7 +146,7 @@ class Provider_Command extends WP_CLI_Command {
 	 * @param array{discover?: bool, 'limit-response-size'?: string, 'link-type'?: 'json'|'xml', } $assoc_args Associative arguments.
 	 */
 	public function match_provider( $args, $assoc_args ) {
-		$oembed = new \WP_oEmbed();
+		$oembed = new \FP_oEmbed();
 
 		$url                 = $args[0];
 		$discover            = Utils\get_flag_value( $assoc_args, 'discover', true );
@@ -161,7 +161,7 @@ class Provider_Command extends WP_CLI_Command {
 			} else {
 				$msg = "The 'link-type' option can only be used with discovery.";
 			}
-			WP_CLI::error( $msg );
+			FP_CLI::error( $msg );
 		}
 
 		if ( $response_size_limit ) {
@@ -197,20 +197,20 @@ class Provider_Command extends WP_CLI_Command {
 
 		if ( ! $provider ) {
 			if ( ! $discover ) {
-				WP_CLI::error( 'No oEmbed provider found for given URL. Maybe try discovery?' );
+				FP_CLI::error( 'No oEmbed provider found for given URL. Maybe try discovery?' );
 			} else {
-				WP_CLI::error( 'No oEmbed provider found for given URL.' );
+				FP_CLI::error( 'No oEmbed provider found for given URL.' );
 			}
 		}
 
-		WP_CLI::line( $provider );
+		FP_CLI::line( $provider );
 	}
 
 	/**
 	 * Get Formatter object based on supplied parameters.
 	 *
 	 * @param array $assoc_args Parameters passed to command. Determines formatting.
-	 * @return \WP_CLI\Formatter
+	 * @return \FP_CLI\Formatter
 	 */
 	protected function get_formatter( &$assoc_args ) {
 		return new Formatter( $assoc_args, $this->default_fields );
