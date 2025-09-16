@@ -1,10 +1,10 @@
 Feature: Manage embed handlers.
 
   Background:
-    Given a FP install
+    Given a FIN install
 
   Scenario: List embed handlers
-    When I run `fp embed handler list`
+    When I run `fin embed handler list`
     And save STDOUT as {DEFAULT_STDOUT}
     Then STDOUT should contain:
       """
@@ -40,16 +40,16 @@ Feature: Manage embed handlers.
       """
     And STDOUT should not contain:
       """
-      fp_embed_handler
+      fin_embed_handler
       """
 
-    When I run `fp embed handler list --fields=id,regex`
+    When I run `fin embed handler list --fields=id,regex`
     Then STDOUT should be:
       """
       {DEFAULT_STDOUT}
       """
 
-    When I run `fp embed handler list --fields=priority,id`
+    When I run `fin embed handler list --fields=priority,id`
     Then STDOUT should end with a table containing rows:
       | priority | id                |
       | 9999     | audio             |
@@ -57,10 +57,10 @@ Feature: Manage embed handlers.
 
     Given an embed_register_handler.php file:
       """
-      <?php FP_CLI::add_hook( 'after_fp_load', function() { fp_embed_register_handler( 'my_id', '/regex/', 'callback', 123 ); } );
+      <?php FIN_CLI::add_hook( 'after_fin_load', function() { fin_embed_register_handler( 'my_id', '/regex/', 'callback', 123 ); } );
       """
 
-    When I run `fp --require=embed_register_handler.php embed handler list`
+    When I run `fin --require=embed_register_handler.php embed handler list`
     Then STDOUT should be a table containing rows:
       | id    | regex   |
       | my_id | /regex/ |
@@ -73,14 +73,14 @@ Feature: Manage embed handlers.
       video
       """
 
-    When I run `fp --require=embed_register_handler.php embed handler list --format=csv --fields=regex,callback,priority`
+    When I run `fin --require=embed_register_handler.php embed handler list --format=csv --fields=regex,callback,priority`
     Then STDOUT should contain:
       """
       /regex/,callback,123
       """
 
     # Handlers are sorted by priority
-    When I run `fp --require=embed_register_handler.php embed handler list --field=id`
+    When I run `fin --require=embed_register_handler.php embed handler list --field=id`
     Then STDOUT should contain:
       """
       my_id

@@ -1,10 +1,10 @@
 <?php
 
-namespace FP_CLI\Embeds;
+namespace FIN_CLI\Embeds;
 
-use FP_CLI;
-use FP_CLI\Formatter;
-use FP_CLI_Command;
+use FIN_CLI;
+use FIN_CLI\Formatter;
+use FIN_CLI_Command;
 
 /**
  * Retrieves embed handlers.
@@ -12,7 +12,7 @@ use FP_CLI_Command;
  * ## EXAMPLES
  *
  *     # List id,regex,priority fields of available handlers.
- *     $ fp embed handler list --fields=priority,id
+ *     $ fin embed handler list --fields=priority,id
  *     +----------+-------------------+
  *     | priority | id                |
  *     +----------+-------------------+
@@ -20,9 +20,9 @@ use FP_CLI_Command;
  *     | 9999     | audio             |
  *     | 9999     | video             |
  *
- * @package fp-cli
+ * @package fin-cli
  */
-class Handler_Command extends FP_CLI_Command {
+class Handler_Command extends FIN_CLI_Command {
 	protected $default_fields = array(
 		'id',
 		'regex',
@@ -64,7 +64,7 @@ class Handler_Command extends FP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # List id,regex,priority fields of available handlers.
-	 *     $ fp embed handler list --fields=priority,id
+	 *     $ fin embed handler list --fields=priority,id
 	 *     +----------+-------------------+
 	 *     | priority | id                |
 	 *     +----------+-------------------+
@@ -75,13 +75,13 @@ class Handler_Command extends FP_CLI_Command {
 	 * @subcommand list
 	 */
 	public function list_handlers( $args, $assoc_args ) {
-		/** @var \FP_Embed $fp_embed */
-		global $fp_embed;
+		/** @var \FIN_Embed $fin_embed */
+		global $fin_embed;
 
 		$all_handlers = array();
 
-		ksort( $fp_embed->handlers );
-		foreach ( $fp_embed->handlers as $priority => $handlers ) {
+		ksort( $fin_embed->handlers );
+		foreach ( $fin_embed->handlers as $priority => $handlers ) {
 			foreach ( $handlers as $id => $handler ) {
 				$all_handlers[] = array(
 					'id'       => $id,
@@ -100,7 +100,7 @@ class Handler_Command extends FP_CLI_Command {
 	 * Get Formatter object based on supplied parameters.
 	 *
 	 * @param array $assoc_args Parameters passed to command. Determines formatting.
-	 * @return \FP_CLI\Formatter
+	 * @return \FIN_CLI\Formatter
 	 */
 	protected function get_formatter( &$assoc_args ) {
 		return new Formatter( $assoc_args, $this->default_fields );

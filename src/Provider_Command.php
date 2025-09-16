@@ -1,11 +1,11 @@
 <?php
 
-namespace FP_CLI\Embeds;
+namespace FIN_CLI\Embeds;
 
-use FP_CLI;
-use FP_CLI\Formatter;
-use FP_CLI\Utils;
-use FP_CLI_Command;
+use FIN_CLI;
+use FIN_CLI\Formatter;
+use FIN_CLI\Utils;
+use FIN_CLI_Command;
 
 /**
  * Retrieves oEmbed providers.
@@ -13,7 +13,7 @@ use FP_CLI_Command;
  * ## EXAMPLES
  *
  *     # List format,endpoint fields of available providers.
- *     $ fp embed provider list
+ *     $ fin embed provider list
  *     +------------------------------+-----------------------------------------+
  *     | format                       | endpoint                                |
  *     +------------------------------+-----------------------------------------+
@@ -22,12 +22,12 @@ use FP_CLI_Command;
  *     | #https?://finpress\.tv/.*#i | https://finpress.tv/oembed/            |
  *
  *     # Get the matching provider for the URL.
- *     $ fp embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ
+ *     $ fin embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ
  *     https://www.youtube.com/oembed
  *
- * @package fp-cli
+ * @package fin-cli
  */
-class Provider_Command extends FP_CLI_Command {
+class Provider_Command extends FIN_CLI_Command {
 	protected $default_fields = array(
 		'format',
 		'endpoint',
@@ -71,7 +71,7 @@ class Provider_Command extends FP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # List format,endpoint fields of available providers.
-	 *     $ fp embed provider list --fields=format,endpoint
+	 *     $ fin embed provider list --fields=format,endpoint
 	 *     +------------------------------+-----------------------------------------+
 	 *     | format                       | endpoint                                |
 	 *     +------------------------------+-----------------------------------------+
@@ -86,7 +86,7 @@ class Provider_Command extends FP_CLI_Command {
 	 */
 	public function list_providers( $args, $assoc_args ) {
 
-		$oembed = new \FP_oEmbed();
+		$oembed = new \FIN_oEmbed();
 
 		$force_regex = Utils\get_flag_value( $assoc_args, 'force-regex' );
 
@@ -137,7 +137,7 @@ class Provider_Command extends FP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Get the matching provider for the URL.
-	 *     $ fp embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ
+	 *     $ fin embed provider match https://www.youtube.com/watch?v=dQw4w9WgXcQ
 	 *     https://www.youtube.com/oembed
 	 *
 	 * @subcommand match
@@ -146,7 +146,7 @@ class Provider_Command extends FP_CLI_Command {
 	 * @param array{discover?: bool, 'limit-response-size'?: string, 'link-type'?: 'json'|'xml', } $assoc_args Associative arguments.
 	 */
 	public function match_provider( $args, $assoc_args ) {
-		$oembed = new \FP_oEmbed();
+		$oembed = new \FIN_oEmbed();
 
 		$url                 = $args[0];
 		$discover            = Utils\get_flag_value( $assoc_args, 'discover', true );
@@ -161,7 +161,7 @@ class Provider_Command extends FP_CLI_Command {
 			} else {
 				$msg = "The 'link-type' option can only be used with discovery.";
 			}
-			FP_CLI::error( $msg );
+			FIN_CLI::error( $msg );
 		}
 
 		if ( $response_size_limit ) {
@@ -197,20 +197,20 @@ class Provider_Command extends FP_CLI_Command {
 
 		if ( ! $provider ) {
 			if ( ! $discover ) {
-				FP_CLI::error( 'No oEmbed provider found for given URL. Maybe try discovery?' );
+				FIN_CLI::error( 'No oEmbed provider found for given URL. Maybe try discovery?' );
 			} else {
-				FP_CLI::error( 'No oEmbed provider found for given URL.' );
+				FIN_CLI::error( 'No oEmbed provider found for given URL.' );
 			}
 		}
 
-		FP_CLI::line( $provider );
+		FIN_CLI::line( $provider );
 	}
 
 	/**
 	 * Get Formatter object based on supplied parameters.
 	 *
 	 * @param array $assoc_args Parameters passed to command. Determines formatting.
-	 * @return \FP_CLI\Formatter
+	 * @return \FIN_CLI\Formatter
 	 */
 	protected function get_formatter( &$assoc_args ) {
 		return new Formatter( $assoc_args, $this->default_fields );

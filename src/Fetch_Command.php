@@ -1,17 +1,17 @@
 <?php
 
-namespace FP_CLI\Embeds;
+namespace FIN_CLI\Embeds;
 
-use FP_CLI;
-use FP_CLI\Utils;
-use FP_CLI_Command;
+use FIN_CLI;
+use FIN_CLI\Utils;
+use FIN_CLI_Command;
 
-class Fetch_Command extends FP_CLI_Command {
+class Fetch_Command extends FIN_CLI_Command {
 	/**
 	 * Attempts to convert a URL into embed HTML.
 	 *
 	 * In non-raw mode, starts by checking the URL against the regex of the registered embed handlers.
-	 * If none of the regex matches and it's enabled, then the URL will be given to the FP_oEmbed class.
+	 * If none of the regex matches and it's enabled, then the URL will be given to the FIN_oEmbed class.
 	 *
 	 * In raw mode, checks the providers directly and returns the data.
 	 *
@@ -58,16 +58,16 @@ class Fetch_Command extends FP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Get embed HTML for a given URL.
-	 *     $ fp embed fetch https://www.youtube.com/watch?v=dQw4w9WgXcQ
+	 *     $ fin embed fetch https://www.youtube.com/watch?v=dQw4w9WgXcQ
 	 *     <iframe width="525" height="295" src="https://www.youtube.com/embed/dQw4w9WgXcQ?feature=oembed" ...
 	 *
 	 *     # Get raw oEmbed data for a given URL.
-	 *     $ fp embed fetch https://www.youtube.com/watch?v=dQw4w9WgXcQ --raw
+	 *     $ fin embed fetch https://www.youtube.com/watch?v=dQw4w9WgXcQ --raw
 	 *     {"author_url":"https:\/\/www.youtube.com\/user\/RickAstleyVEVO","width":525,"version":"1.0", ...
 	 */
 	public function __invoke( $args, $assoc_args ) {
-		/** @var \FP_Embed $fp_embed */
-		global $fp_embed;
+		/** @var \FIN_Embed $fin_embed */
+		global $fin_embed;
 
 		$url        = $args[0];
 		$raw        = Utils\get_flag_value( $assoc_args, 'raw' );
@@ -103,14 +103,14 @@ class Fetch_Command extends FP_CLI_Command {
 			$oembed_args['discover'] = $discover ? '1' : '0'; // Make it a string as if from a shortcode attribute.
 		}
 
-		$discover = null === $discover ? true : (bool) $discover; // Will use to set `$oembed_args['discover']` when not calling `FP_Embed::shortcode()`.
+		$discover = null === $discover ? true : (bool) $discover; // Will use to set `$oembed_args['discover']` when not calling `FIN_Embed::shortcode()`.
 
 		if ( ! $discover && null !== $response_size_limit ) {
-			FP_CLI::error( "The 'limit-response-size' option can only be used with discovery." );
+			FIN_CLI::error( "The 'limit-response-size' option can only be used with discovery." );
 		}
 
 		if ( ! $raw && null !== $raw_format ) {
-			FP_CLI::error( "The 'raw-format' option can only be used with the 'raw' option." );
+			FIN_CLI::error( "The 'raw-format' option can only be used with the 'raw' option." );
 		}
 
 		if ( $response_size_limit ) {
@@ -127,7 +127,7 @@ class Fetch_Command extends FP_CLI_Command {
 
 		// If raw, query providers directly, by-passing cache.
 		if ( $raw ) {
-			$oembed = new \FP_oEmbed();
+			$oembed = new \FIN_oEmbed();
 
 			$oembed_args['discover'] = $discover;
 
@@ -142,8 +142,8 @@ class Fetch_Command extends FP_CLI_Command {
 				3
 			);
 
-			// Allow `fp_filter_pre_oembed_result()` to provide local URLs (FP >= 4.5.3).
-			// phpcs:ignore FinPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Using FP Core hook.
+			// Allow `fin_filter_pre_oembed_result()` to provide local URLs (FIN >= 4.5.3).
+			// phpcs:ignore FinPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Using FIN Core hook.
 			$data = apply_filters( 'pre_oembed_result', null, $url, $oembed_args );
 
 			if ( null === $data ) {
@@ -151,9 +151,9 @@ class Fetch_Command extends FP_CLI_Command {
 
 				if ( ! $provider ) {
 					if ( ! $discover ) {
-						FP_CLI::error( 'No oEmbed provider found for given URL. Maybe try discovery?' );
+						FIN_CLI::error( 'No oEmbed provider found for given URL. Maybe try discovery?' );
 					} else {
-						FP_CLI::error( 'No oEmbed provider found for given URL.' );
+						FIN_CLI::error( 'No oEmbed provider found for given URL.' );
 					}
 				}
 
@@ -161,61 +161,61 @@ class Fetch_Command extends FP_CLI_Command {
 			}
 
 			if ( false === $data ) {
-				FP_CLI::error( 'There was an error fetching the oEmbed data.' );
+				FIN_CLI::error( 'There was an error fetching the oEmbed data.' );
 			}
 
 			if ( 'xml' === $raw_format ) {
 				if ( ! class_exists( 'SimpleXMLElement' ) ) {
-					FP_CLI::error( "The PHP extension 'SimpleXMLElement' is not available but is required for XML-formatted output." );
+					FIN_CLI::error( "The PHP extension 'SimpleXMLElement' is not available but is required for XML-formatted output." );
 				}
-				FP_CLI::log( (string) $this->oembed_create_xml( (array) $data ) );
+				FIN_CLI::log( (string) $this->oembed_create_xml( (array) $data ) );
 			} else {
-				FP_CLI::log( (string) json_encode( $data ) );
+				FIN_CLI::log( (string) json_encode( $data ) );
 			}
 
 			return;
 		}
 
 		if ( $post_id ) {
-			// phpcs:ignore FinPress.FP.GlobalVariablesOverride.Prohibited -- the request is asking for a post id directly so need to override the global.
+			// phpcs:ignore FinPress.FIN.GlobalVariablesOverride.Prohibited -- the request is asking for a post id directly so need to override the global.
 			$GLOBALS['post'] = get_post( (int) $post_id );
 			if ( null === $GLOBALS['post'] ) {
-				FP_CLI::warning( sprintf( "Post id '%s' not found.", $post_id ) );
+				FIN_CLI::warning( sprintf( "Post id '%s' not found.", $post_id ) );
 			}
 		}
 
 		if ( Utils\get_flag_value( $assoc_args, 'skip-sanitization', false ) ) {
-			remove_filter( 'oembed_dataparse', 'fp_filter_oembed_result', 10 );
+			remove_filter( 'oembed_dataparse', 'fin_filter_oembed_result', 10 );
 		}
 
 		if ( Utils\get_flag_value( $assoc_args, 'skip-cache', false ) ) {
-			$fp_embed->usecache = false;
-			// In order to skip caching, also need `$cached_recently` to be false in `FP_Embed::shortcode()`, so set TTL to zero.
+			$fin_embed->usecache = false;
+			// In order to skip caching, also need `$cached_recently` to be false in `FIN_Embed::shortcode()`, so set TTL to zero.
 			add_filter( 'oembed_ttl', '__return_zero', PHP_INT_MAX );
 		} else {
-			$fp_embed->usecache = true;
+			$fin_embed->usecache = true;
 		}
 
-		// `FP_Embed::shortcode()` sets the 'discover' attribute based on 'embed_oembed_discover' filter, no matter what's passed to it.
+		// `FIN_Embed::shortcode()` sets the 'discover' attribute based on 'embed_oembed_discover' filter, no matter what's passed to it.
 		add_filter( 'embed_oembed_discover', $discover ? '__return_true' : '__return_false', PHP_INT_MAX );
 
-		$html = $fp_embed->shortcode( $oembed_args, $url );
+		$html = $fin_embed->shortcode( $oembed_args, $url );
 
 		if ( false !== $html && '[' === substr( $html, 0, 1 ) && Utils\get_flag_value( $assoc_args, 'do-shortcode' ) ) {
 			$html = do_shortcode( $html, true );
 		}
 
 		if ( false === $html ) {
-			FP_CLI::error( 'There was an error fetching the oEmbed data.' );
+			FIN_CLI::error( 'There was an error fetching the oEmbed data.' );
 		}
 
-		FP_CLI::log( $html );
+		FIN_CLI::log( $html );
 	}
 
 	/**
 	 * Creates an XML string from a given array.
 	 *
-	 * Same as `\_oembed_create_xml()` in "fp-includes\embed.php" introduced in FP 4.4.0. Polyfilled as marked private (and also to cater for older FP versions).
+	 * Same as `\_oembed_create_xml()` in "fin-includes\embed.php" introduced in FIN 4.4.0. Polyfilled as marked private (and also to cater for older FIN versions).
 	 *
 	 * @see _oembed_create_xml()
 	 *
